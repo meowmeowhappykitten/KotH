@@ -16,56 +16,56 @@ class Koth
 	end
 
 	#deletes gamer from loser/challenger bracket without deleting score
-	def loser(gamer)
-		@losers.delete_at(find_index(gamer))
-		@challengers.delete_at(find_index(gamer))
+	def remove_player(gamer)
+		@losers.delete(gamer)
+		@challengers.delete(gamer)
 	end
 
 
 	def leaderboard 
-	 @scores.sort_by { |_, score| -score }
+		@scores.sort_by { |_, score| -score }
 	end
 
-	def chal1
-	unless challenger_1
-		@challenger_1 = challengers.shift
-			if @challengers.empty?
-				then losers.shift
-			end
+	def assign_challenger_1
+		if @challengers.empty?
+			@challenger_1 = @losers.shift 
+		else
+			@challenger_1 = @challengers.shift
 		end
 	end
 
-	def chal2
-	if challengers.empty?
-		@challenger_2 = losers.shift
+	def assign_challenger_2
+		if @challengers.empty?
+			@challenger_2 = @losers.shift
 		else
-		@challenger_2 = challengers.shift 
-	 end
+			@challenger_2 = @challengers.shift 
+		end
 	end
 
 	def letsplay
-		chal1
-		chal2
-	puts "Now playing: #{challenger_1} vs. #{challenger_2}"
+		@challenger_1 ||= assign_challenger_1
+		assign_challenger_2
+		puts "Now playing: #{challenger_1} vs. #{challenger_2}"
 
-	#prompt who won?
-	print "Who won #{challenger_1} or #{challenger_2}?"
-	@winner = gets.chomp
+		#prompt who won?
+		print "Who won #{challenger_1} or #{challenger_2}?"
+		winner = gets.chomp
+		until winner == @challenger_1 or @challenger_2
+			print "Uhm I think you had a typo.  Who won?"
+			winner = gets.chomp
+		end
 
-	if winner = @challenger_1
-		losers << @challenger_2
-		chal2
-	elsif
-	# winner = challenger_2
-	 losers << @challenger_1
-	 @challenger_1 = nil
-	 chal1
-	else
-		prints "Uhm I think you had a typo.  Who won?"
-		@winner = gets.chomp
+		@scores[winner] += 1
+		if winner == @challenger_1
+			losers << @challenger_2
+		else
+			losers << @challenger_1
+			@challenger_1 = @challenger_2
+			@challenger_2 = nil
+		end
+		puts "Winner is #{winner} with #{@scores[winner]} points!"
 	end
-	end
-	#save answer as challenger 1, mark win in Winners Hash, put loser at end of loser's array, create bye functionality, which will mark a user as not present, and let the other user play in the next match.
+	#create bye functionality, which will mark a user as not present, and let the other user play in the next match.
 	#create deleteloser method that will delete a loser from the loser's array without deleting him from the winners array.
 end
 
